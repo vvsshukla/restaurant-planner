@@ -4,6 +4,8 @@ import axios from "axios";
 import { Table } from "antd";
 import {BrowserRouter,Routes, Route, Link} from "react-router-dom";
 import Pricing from "./components/Pricing.jsx";
+import Sidebar from './components/Sidebar.jsx';
+import Header from './components/Header.jsx';
 
 function App() {
   return (
@@ -12,7 +14,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/pricing/:menu_item' element = {<Pricing/>} />
-          <Route path='/recipe/:menu_item' element = {<Recipe/>} />
+          <Route path='/recipe/:menu_item' element = {<Pricing/>} />
         </Routes>
       </div>
     </BrowserRouter>
@@ -23,6 +25,7 @@ const Home = () => {
   const [restaurantName, setRestaurantName] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  
   const handleCuisine = async (e) => {
     setLoading(true);
     const cuisine = e.target.value;
@@ -37,23 +40,19 @@ const Home = () => {
     setMenuItems(parsedDetails['menu_items']);
     setLoading(false);
   }
+
+  const Details = () => {
+    return <div className='detailsHistory'>
+      {loading && menuItems?.length === 0 ? <div>Loading...</div> : <Restaurant restaurantName={restaurantName} menuItems={menuItems} />}
+    </div>;
+  }
+
   return <>
-    <div className='sidebar flex-center'>
-      <div className='select-cuisine'>
-        <label htmlFor="cuisine">Pick a cuisine</label>
-        <select className='cuisine' id="cuisine" onChange={(e) => handleCuisine(e)}>
-          <option value="">Select Cuisine</option>
-          <option value="Indian">Indian</option>
-          <option value="Italian">Italian</option>
-        </select>
-      </div>
-    </div>
+    <Sidebar onChangeAction={handleCuisine}/>
     <div className='content'>
       <div className='restaurant-details'>
-        <h1>Restaurant Name Generator</h1>
-        <div className='detailsHistory'>
-          {loading && menuItems?.length === 0 ? <div>Loading...</div> : <Restaurant restaurantName={restaurantName} menuItems={menuItems} />}
-        </div>
+        <Header/>
+        <Details/>
       </div>
     </div>
   </>
@@ -89,15 +88,16 @@ const Restaurant = ({ restaurantName, menuItems }) => {
     });
   });
   
-  return <>{isRestaurantReady ? (<div className='restaurant'>
-    <h2 className="restaurantName">{restaurantName}</h2>
-    <div className='menuItems'>
-      <Table dataSource={dataSource} columns={columns} />
-    </div>
-  </div>) :
-    (<p><span id='leftArrow'>&#8592;</span><span>Once you pick a cuisine, you will see restaurant name along with menu items.</span></p>)
-  }
-  </>
+  return <>
+            {isRestaurantReady ? (<div className='restaurant'>
+              <p className="restaurantName">{restaurantName}</p>
+              <div className='menuItems'>
+                <Table dataSource={dataSource} columns={columns} />
+              </div>
+            </div>) :
+              (<><span id='leftArrow'>&#8592;</span><span>Once you pick a cuisine, you will see restaurant name along with menu items.</span></>)
+            }
+        </>
 }
 
 const MenuActiions = ({menuItemName}) => {
@@ -105,10 +105,6 @@ const MenuActiions = ({menuItemName}) => {
       <Link to={`/pricing/${menuItemName}`}>Pricing</Link>
       <Link to={`/recipe/${menuItemName}`}>Recipe</Link>
     </div>
-}
-
-const Recipe = () => {
-
 }
 
 export default App;
